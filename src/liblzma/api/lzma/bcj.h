@@ -57,6 +57,11 @@
  */
 #define LZMA_FILTER_RISCV       LZMA_VLI_C(0x0B)
 
+/**
+ * \brief       Filter for DEC Alpha binaries
+ */
+#define LZMA_FILTER_ALPHA       LZMA_VLI_C(0x3F048B03BC530001)
+
 
 /**
  * \brief       Options for BCJ filters
