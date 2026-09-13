@@ -219,6 +219,35 @@ test_short_input(void)
 }
 
 
+static void
+test_raw_functions(void)
+{
+#if !defined(HAVE_ENCODER_ALPHA) || !defined(HAVE_DECODER_ALPHA)
+	assert_skip("DEC Alpha BCJ encoder and/or decoder is disabled");
+#else
+	uint8_t *buf = tuktest_malloc(sizeof(test_data));
+
+	for (size_t size = 0; size < 20; ++size)
+		assert_uint_eq(lzma_bcj_alpha_encode(0, buf, size), 0);
+
+	static const uint32_t offsets[] = { 0, 4, 4096, UINT32_MAX - 3 };
+
+	for (size_t i = 0; i < ARRAY_SIZE(offsets); ++i) {
+		memcpy(buf, test_data, sizeof(test_data));
+
+		const size_t enc = lzma_bcj_alpha_encode(
+				offsets[i], buf, sizeof(test_data));
+		assert_uint_eq(enc % 4, 0);
+		assert_uint(sizeof(test_data) - enc, <, 20);
+
+		assert_uint_eq(lzma_bcj_alpha_decode(
+				offsets[i], buf, sizeof(test_data)), enc);
+		assert_array_eq(buf, test_data, sizeof(test_data));
+	}
+#endif
+}
+
+
 extern int
 main(int argc, char **argv)
 {
@@ -233,6 +262,7 @@ main(int argc, char **argv)
 	create_test_data();
 	tuktest_run(test_chunking);
 	tuktest_run(test_short_input);
+	tuktest_run(test_raw_functions);
 #endif
 
 	return tuktest_end();
